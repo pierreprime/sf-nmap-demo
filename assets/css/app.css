@@ -1,0 +1,63 @@
+body {
+    background-color: black;
+    color: limegreen;
+}
+
+input {
+    color: white;
+    text-align: center;
+}
+
+#mainframe{
+    border: 2px solid limegreen;
+    margin-top: 5%;
+    margin-bottom: 5%;
+    padding-bottom: 2%;
+    margin-left: auto;
+    margin-right: auto;
+    width: 80%;
+}
+
+ul{
+    text-align: center;
+}
+
+input[type=text], input[type=number]{
+    width: 40%;
+    display: block;
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border: 2px solid limegreen;
+    background-color: black;
+}
+
+#nmap_scanButton{
+    width: 30%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border: 2px solid limegreen;
+    background-color: black;
+    color: limegreen;
+}
+
+#nmap_scanButton:focus{
+    background-color: dimgrey;
+    border: 3px solid lightgreen;
+}
+
+::marker{
+    color: yellow;
+}
+
+h1, h3{
+    text-align: center;
+}
+
+input:focus
+{
+    background-color: dimgrey;
+    border: 3px solid lightgreen;
+}
+

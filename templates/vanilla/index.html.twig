@@ -1,0 +1,17 @@
+{# adapt to twig #}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Port scanner demo{% endblock %}
+
+{% block body %}
+        <h1>Port scanner</h1>
+
+        <div>
+            <center class="maindiv">
+                {{ form_start(form) }}
+                    {{ form_widget(form) }}
+                {{ form_end(form) }}
+            </center>
+        </div>
+{% endblock %}

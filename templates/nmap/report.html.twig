@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Port scanner report{% endblock %}
+
+{% block body %}
+    <a href="{{ path('nmap') }}">Go back</a>
+    {% if hosts is empty %}
+        <b>No hosts were found during this scan.</b>
+        {% else %}
+        <h1>Here is the hosts scanned</h1>
+        {% for host in hosts %}
+            <h3>Host addresses :</h3>
+            <ul>
+                {% for address in host.addresses %}
+                    <li>{{ address.address }} ({{ address.type }}), vendor {{ address.vendor }}</li>
+                {% endfor %}
+            </ul>
+            <h3>Host state : {{ host.state | upper }}</h3>
+            <h3>Host hostnames :</h3>
+            <ul>
+                {% for hostname in host.hostnames %}
+                    <li>{{ hostname.name }} ({{ hostname.type }})</li>
+                {% endfor %}
+            </ul>
+            <h3>State of ports :</h3>
+            <ul>
+                {% for port in host.ports %}
+                    <li>
+                        Port number {{ port.number }} of service/protocol {{ port.protocol }} is {{ port.state }}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endfor %}
+    {% endif %}
+{% endblock %}
