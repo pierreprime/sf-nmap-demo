@@ -24,3 +24,10 @@
 npm-debug.log
 yarn-error.log
 ###< symfony/webpack-encore-bundle ###
+
+outputExample.json
+
+# IDE
+/.idea/
+sf-nmap-demo-local-mdm.postman_environment.json
+sf-nmap-demo-local-home.postman_environment.json

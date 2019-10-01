@@ -1,0 +1,53 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Symfony Nmap demo",
+        "version": "0.1"
+    },
+    "paths": {
+        "/nmap/scan": {
+            "post": {
+                "description": "Unified nmap scan for commands",
+                "operationId": "App\\Controller\\NmapController::nmapScanValid",
+                "responses": {
+                    "200": {
+                        "description": "Multiple hosts report",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schema/Host"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Address": {
+                "title": "Address",
+                "description": "Generic address description",
+                "properties": {
+                    "address": {
+                        "title": "Address",
+                        "description": "IPv4, IPv6 or MAC address"
+                    },
+                    "type": {
+                        "title": "Address type",
+                        "description": "IPv4, IPv6 or MAC enum"
+                    },
+                    "vendor": {
+                        "title": "vendor",
+                        "description": "Vendor of address"
+                    }
+                },
+                "type": "object"
+            }
+        }
+    }
+}

@@ -9,6 +9,22 @@
         {% else %}
         <h1>Here is the hosts scanned</h1>
         {% for host in hosts %}
+            {# LIST OF FLAG GIVEN TO NMAP REPORTS
+                - ipSubnet
+                    hosts UP or DOWN (latency)
+                    list of IPs
+                - verbose
+                    DNS resolution of hosts
+                    HTTP verbs
+                - osDetection (extends open ports)
+                    mac address
+                    device type
+                    running (OS)
+                    OS details
+                    network distance
+                - openPorts (extends ip subnet for one IP)
+                    port state
+             #}
             <h3>Host addresses :</h3>
             <ul>
                 {% for address in host.addresses %}
@@ -26,7 +42,7 @@
             <ul>
                 {% for port in host.ports %}
                     <li>
-                        Port number {{ port.number }} of service/protocol {{ port.protocol }} is {{ port.state }}
+                        Port number {{ port.number }} of service/protocol {{ port.service.name }} is {{ port.state }}
                     </li>
                 {% endfor %}
             </ul>

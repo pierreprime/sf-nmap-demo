@@ -2,9 +2,12 @@
 
 namespace App\Controller;
 
+use App\Document\Address;
 use App\Service\NmapService;
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Form\NmapRequest;
 use App\Form\NmapType;
@@ -13,13 +16,29 @@ use App\Form\VanillaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Request;
+use OpenApi\Annotations as OA;
+use App\Document\User;
+use Doctrine\ODM\MongoDB\DocumentManager as DocumentManager;
 
+/**
+ * Class NmapController
+ * @package App\Controller
+ * @OA\Info(
+ *     title="Symfony Nmap demo",
+ *     version="0.1"
+ * )
+ */
 class NmapController extends AbstractController
 {
     /**
      * @var Doctrine\Common\Persistence\ObjectManager
      */
     private $om;
+
+    /**
+     * @var DocumentManager
+     */
+    private $dm;
 
     /**
      * @var Request|null
@@ -31,63 +50,156 @@ class NmapController extends AbstractController
      */
     private $nmapService;
 
-    public function __construct(ObjectManager $om, RequestStack $requestStack, NmapService $nmapService)
+    /**
+     * @Route("/mongo", methods={"GET"})
+     */
+    public function mongoTest(){
+
+        $address = new Address();
+        $address->setAddress('localhost');
+        $address->setType('type1');
+        $address->setVendor('tigers');
+        // make host nullable
+        $this->dm->persist($address);
+        $this->dm->flush();
+
+        return new Response('Created address id '.$address->getId());
+    }
+
+    // TEMP
+    public function __construct(ObjectManager $om, RequestStack $requestStack, NmapService $nmapService, DocumentManager $dm)
     {
         $this->om = $om;
+        $this->dm = $dm;
         $this->request = $requestStack->getCurrentRequest();
         $this->nmapService = $nmapService;
     }
 
     /**
-     * @Route("/nmap", name="nmap")
+     * @OA\Post(
+     *     path="/nmap/scan",
+     *     description="Unified nmap scan for commands",
+     *     @OA\Response(
+     *          response=200,
+     *          description="Multiple hosts report",
+     *          @OA\JsonContent(
+     *              type="array",
+     *              @OA\Items(ref="#/components/schema/Host")
+     *          )
+     *     )
+     * )
+     * @Route(
+     *     path="/nmap/scan",
+     *     name="nmap_scan",
+     *     methods={"POST"}
+     * )
      */
-    public function nmapIndex()
+    public function nmapScanValid()
     {
-        $nmapRequest = new NmapRequest();
-        $form = $this->createForm(NmapType::class, $nmapRequest, [
-            //'action' => $this->generateUrl('nmap_report'),
-            //'method' => 'POST'
-        ]);
-        $form->handleRequest($this->request);
+        // determine ip range and ports list
+        $data = json_decode($this->request->getContent(), true);
+        $ipRange = $data['ipRange'];
+        $command = $data['command'];
+        $ports = $data['ports'];
 
-        if($form->isSubmitted() && $form->isValid()){
-            $data = $form->getData();
-
-            $ipRange = [
-                '192.168.1.1'
-            ];
-            $portsList = [
-                '21', '22', '80'
-            ];
-
-            // service class with nmap treatment
-            $hosts = $this->nmapService->discoverIpsSubnet($ipRange, $portsList);
-            //$hosts = $this->nmapService->scanOpenPorts($ipRange, $portsList);
-            //$hosts = $this->nmapService->identityHostnames($ipRange, $portsList);
-            //$hosts = $this->nmapService->tcpConnectScan($ipRange, $portsList);
-            //$hosts = $this->nmapService->aggressiveScan($ipRange, $portsList);
-            //$hosts = $this->nmapService->fastScan($ipRange, $portsList);
-            //$hosts = $this->nmapService->verboseScan($ipRange, $portsList);
-
-            // requires root privileges
-            //$hosts = $this->nmapService->identifyOs($ipRange, $portsList);
-            //$hosts = $this->nmapService->tcpSynUdpScan($ipRange, $portsList);
-            //$hosts = $this->nmapService->tcpSynUdpAllPortsScan($ipRange, $portsList);
-
-            return $this->forward('App\Controller\NmapController::nmapReport', [
-                'hosts' => $hosts
-            ]);
+        // raw output
+        $hosts = [];
+        switch ($command){
+            case "discover_ips":
+                $hosts = $this->nmapService->discoverIpsSubnet($ipRange);
+                break;
+            case "open_ports":
+                $hosts = $this->nmapService->scanOpenPorts($ipRange, $ports);
+                break;
+            default:
+                $hosts = [
+                    'no hosts, invalid command'
+                ];
+                break;
         }
 
-        // manage output
-
-        return $this->render('nmap/index.html.twig', array(
-            'form' => $form->createView()
-        ));
+        return $this->json($hosts);
     }
 
     /**
-     * @Route("/nmap/report", name="nmap_report", methods={"POST", "GET"})
+     * @Route(
+     *     path="/nmap/os",
+     *     name="identify_os",
+     *     methods={"POST"}
+     * )
+     */
+    public function identfiyOs()
+    {
+        $hosts = $this->nmapService->identifyOs($ipRange, $portsList);
+        return $this->json($hosts);
+    }
+
+    /**
+     * @Route(
+     *     path="/nmap/hostnames",
+     *     name="identify_hostnames",
+     *     methods={"POST"}
+     * )
+     */
+    public function identifyHostnames($ipRange, $portsList)
+    {
+        $hosts = $this->nmapService->identifyHostnames($ipRange, $portsList);
+        return $this->json($hosts);
+    }
+
+    /**
+     * @Route(
+     *     path="/nmap/synudp",
+     *     name="syncudp_scan",
+     *     methods={"POST"}
+     * )
+     */
+    public function synAndUdpScan()
+    {
+    }
+
+    /**
+     * @Route(
+     *     path="/nmap/tcpconnect",
+     *     name="tcpconnect_scan",
+     *     methods={"POST"}
+     * )
+     */
+    public function tcpConnectScan()
+    {
+
+    }
+
+    /**
+     * @Route(
+     *     path="/nmap/aggressive",
+     *     name="aggressive_scan",
+     *     methods={"POST"}
+     * )
+     */
+    public function aggressiveScan()
+    {
+
+    }
+
+    /**
+     * @Route(
+     *     path="/nmap/fast",
+     *     name="fast_scan",
+     *     methods={"POST"}
+     * )
+     */
+    public function fastScan()
+    {
+
+    }
+
+    /**
+     * @Route(
+     *     path="/nmap/report",
+     *     name="nmap_report",
+     *     methods={"POST", "GET"}
+     * )
      */
     public function nmapReport(array $hosts = [])
     {
@@ -101,7 +213,69 @@ class NmapController extends AbstractController
     }
 
     /**
-     * @Route("/vanilla", name="vanilla")
+     * @Route(
+     *     path="/nmap",
+     *     name="nmap"
+     * )
+     */
+    public function nmapIndex()
+    {
+        $nmapRequest = new NmapRequest();
+        $form = $this->createForm(NmapType::class, $nmapRequest);
+        $form->handleRequest($this->request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+
+            $ipRange = [
+                $data->getFromIp()
+            ];
+            if (!is_null($data->getToIp())) {
+                array_push($ipRange, $data->getToIp());
+            }
+
+            $fromPort = $data->getFromPort();
+            $toPort = $data->getToPort();
+
+            $portsList = [];
+            for ($i = $fromPort; $i <= $toPort; $i++) {
+                array_push($portsList, $i);
+            }
+
+            // service class with nmap treatment
+            if (!empty($data->getOnlyCheckOnline())) {
+                $hosts = $this->nmapService->discoverIpsSubnet($ipRange, $portsList);
+                $macro = 'ipSubnet';
+            } else if (!empty($data->getVerbose())) {
+                $hosts = $this->nmapService->verboseScan($ipRange, $portsList);
+                $macro = 'verbose';
+            } else if (!empty($data->getOsDetection())) {
+                // requires root privileges
+                $hosts = $this->nmapService->identifyOs($ipRange, $portsList);
+                $macro = 'osDetection';
+            } else {
+                $hosts = $this->nmapService->scanOpenPorts($ipRange, $portsList);
+                $macro = 'openPorts';
+            }
+
+            return $this->forward('App\Controller\NmapController::nmapReport', [
+                'hosts' => $hosts,
+                'macro' => $macro
+            ]);
+        }
+
+        // manage output
+
+        return $this->render('nmap/index.html.twig', array(
+            'form' => $form->createView()
+        ));
+    }
+
+    /**
+     * @Route(
+     *     path="/vanilla",
+     *     name="vanilla"
+     * )
      */
     public function vanillaIndex()
     {
@@ -113,7 +287,7 @@ class NmapController extends AbstractController
         $form = $this->createForm(VanillaType::class, $vanillaRequest);
         $form->handleRequest($this->request);
 
-        if($form->isSubmitted() && $form->isValid()){
+        if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
             // launch nmap scan
             return $this->redirectToRoute('vanilla_report', array(
@@ -122,14 +296,17 @@ class NmapController extends AbstractController
                 'to' => $data->getToPort()
             ));
         }
-        
+
         return $this->render('vanilla/index.html.twig', array(
             'form' => $form->createView()
         ));
     }
 
     /**
-     * @Route("/vanilla/report", name="vanilla_report")
+     * @Route(
+     *     path="/vanilla/report",
+     *     name="vanilla_report"
+     * )
      */
     public function vanillaScan()
     {
@@ -144,23 +321,15 @@ class NmapController extends AbstractController
         $openPorts = array();
 
         // validation
-        if(empty($host) || empty($from) || empty($to))
-        {
+        if (empty($host) || empty($from) || empty($to)) {
             echo "<b>Incomplete data, go back choose IP address and port range</b>";
-        }
-        else if(!(filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)))
-        {
+        } else if (!(filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4))) {
             echo "<b>This IP address is not valid !</b>";
-        }
-        else if(!(is_numeric($from)) || !(is_numeric($to)))
-        {
+        } else if (!(is_numeric($from)) || !(is_numeric($to))) {
             echo "<b>Entered data is not port number</b>";
-        }
-        else if($from > $to || $from == $to)
-        {
+        } else if ($from > $to || $from == $to) {
             echo "<b>Please enter lower value in the FROM field</b>";
-        }
-        else // everything OK
+        } else // everything OK
         {
             echo "<br>
             <b>
@@ -174,15 +343,13 @@ class NmapController extends AbstractController
             // create socket
             $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 
-            for($port = $from; $port <= $to; $port++)
-            {
+            for ($port = $from; $port <= $to; $port++) {
                 // connect to host and port
                 $connection = socket_connect($socket, $host, $port);
 
                 // make list of open ports in the loop
 
-                if($connection)
-                {
+                if ($connection) {
                     // add to open ports
                     array_push($openPorts, $port);
 
@@ -206,11 +373,14 @@ class NmapController extends AbstractController
     }
 
     /**
-     * @Route("/", name="report")
+     * @Route(
+     *     path="/",
+     *     name="report"
+     * )
      */
     public function report()
     {
-       return $this->render('nmap/report.html.twig'); 
+        return $this->render('nmap/report.html.twig');
     }
 }
 

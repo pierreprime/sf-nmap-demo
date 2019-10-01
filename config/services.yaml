@@ -4,6 +4,9 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
+    env(MONGODB_URL): ''
+    env(MONGODB_DB): ''
+    mongodb_server: "mongodb://localhost:27017"
 
 services:
     # default configuration for services in *this* file
@@ -22,6 +25,12 @@ services:
     App\Controller\:
         resource: '../src/Controller'
         tags: ['controller.service_arguments']
+
+    willdurand_nmap_service:
+        class: Nmap\Nmap
+        autowire: true
+
+    Nmap\Nmap: '@willdurand_nmap_service'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

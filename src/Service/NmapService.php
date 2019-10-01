@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use Nmap\Nmap;
+use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
  * Class NmapService
@@ -17,8 +18,13 @@ class NmapService
      */
     private $nmap;
 
-    public function __construct()
+    /**
+     * NmapService constructor.
+     * @param Nmap $nmap
+     */
+    public function __construct(Nmap $nmap)
     {
+        $this->nmap = $nmap;
     }
 
     /**
@@ -28,8 +34,12 @@ class NmapService
      */
     public function discoverIpsSubnet($ipRange, $portsList = [])
     {
-        $this->nmap = new Nmap();
-        return $this->nmap->scan($ipRange, $portsList);
+        /*
+         * -sP option, -sn for more recent releases of nmap (actual here)
+         */
+        return $this->nmap
+            ->disablePortScan()
+            ->scan($ipRange);
     }
 
     /**
@@ -39,8 +49,24 @@ class NmapService
      */
     public function scanOpenPorts($ipRange, $portsList = [])
     {
-        $this->nmap = new Nmap();
+        /**
+         * No flags at all, default behaviour
+         */
         return $this->nmap->scan($ipRange, $portsList);
+    }
+
+    /**
+     * @param $ipRange
+     * @param array $portsList
+     * @return \Nmap\Host[]
+     */
+    public function verboseScan($ipRange, $portsList = [])
+    {
+        /*
+         * -v flag
+         */
+        return $this->nmap->enableVerbose()
+            ->scan($ipRange, $portsList);
     }
 
     /**
@@ -51,88 +77,47 @@ class NmapService
      */
     public function identifyOs($ipRange, $portsList = [])
     {
-        $this->nmap = new Nmap();
+        /*
+         * -O flag
+         */
         return $this->nmap->enableOsDetection()
             ->scan($ipRange, $portsList);
     }
 
     /**
+     * no root required
      * @param $ipRange
      * @param array $portsList
-     * @return \Nmap\Host[]
+     * @return
      */
-    public function identityHostnames($ipRange, $portsList = [])
-    {
-        $this->nmap = new Nmap();
-        return $this->nmap->scan($ipRange, $portsList = []);
+    public function identifyHostnames($ipRange, $portsList = []){
+        /*
+         * -sL flag
+         * not existing yet in library
+         */
+        return $this->nmap->scan($ipRange, $portsList);
     }
 
-    /**
-     * requires root
-     * @param $ipRange
-     * @param array $portsList
-     * @return \Nmap\Host[]
-     */
-    public function tcpSynUdpScan($ipRange, $portsList = [])
-    {
-        $this->nmap = new Nmap();
-        return $this->nmap->scan($ipRange, $portsList = []);
+    public function synAndUdpScan($ipRange, $portsList = []){
+        /*
+         * -sS, -sU and -PN flags
+         * option not existing yet in library
+         */
+        return $this->nmap->scan($ipRange, $portsList);
     }
 
-    /**
-     * requires root
-     * @param $ipRange
-     * @param array $portsList
-     * @return \Nmap\Host[]
-     */
-    public function tcpSynUdpAllPortsScan($ipRange, $portsList = [])
-    {
-        $this->nmap = new Nmap();
-        return $this->nmap->scan($ipRange, $portsList = []);
+    public function tcpConnectScan($ipRange, $portsList = []){
+        /*
+         * -sT flag
+         * option not existing yet in library
+         */
+        return $this->nmap->scan($ipRange, $portsList);
     }
 
-    /**
-     * @param $ipRange
-     * @param array $portsList
-     * @return \Nmap\Host[]
-     */
-    public function tcpConnectScan($ipRange, $portsList = [])
-    {
-        $this->nmap = new Nmap();
-        return $this->nmap->scan($ipRange, $portsList = []);
-    }
-
-    /**
-     * @param $ipRange
-     * @param array $portsList
-     * @return \Nmap\Host[]
-     */
-    public function aggressiveScan($ipRange, $portsList = [])
-    {
-        $this->nmap = new Nmap();
-        return $this->nmap->scan($ipRange, $portsList = []);
-    }
-
-    /**
-     * @param $ipRange
-     * @param array $portsList
-     * @return \Nmap\Host[]
-     */
-    public function fastScan($ipRange, $portsList = [])
-    {
-        $this->nmap = new Nmap();
-        return $this->nmap->scan($ipRange, $portsList = []);
-    }
-
-    /**
-     * @param $ipRange
-     * @param array $portsList
-     * @return \Nmap\Host[]
-     */
-    public function verboseScan($ipRange, $portsList = [])
-    {
-        $this->nmap = new Nmap();
-        return $this->nmap->enableVerbose()
-            ->scan($ipRange, $portsList);
+    public function aggressiveScan($ipRange, $portsList = []){
+        /*
+         * -T4 and -A flags
+         */
+        return $this->nmap->scan($ipRange, $portsList);
     }
 }

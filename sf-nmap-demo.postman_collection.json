@@ -1,0 +1,294 @@
+{
+	"info": {
+		"_postman_id": "ef2fc339-d553-4371-9b6a-b02da7e327fc",
+		"name": "sf-nmap-demo",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Discover IPs in subnet",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"ipRange\": [\n\t\t\"{{network_v4}}\"\n\t],\n\t\"command\": \"discover_ips\",\n\t\"flags\": [\n\t\t\"-sP\"\n\t],\n\t\"verbose\": 1,\n\t\"ports\": []\n}"
+				},
+				"url": {
+					"raw": "{{url}}/nmap/scan",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"nmap",
+						"scan"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Scan for open ports",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "cada930d-926c-41ef-b29a-99eac8c0d4a6",
+						"exec": [
+							"postman.setEnvironmentVariable()"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"ipRange\": [\n\t\t\"{{network_v4}}\"\n\t],\n\t\"command\": \"open_ports\",\n\t\"verbose\": 1,\n\t\"flags\": [],\n\t\"ports\": [\n\t\t\"1-100\"\n\t]\n}"
+				},
+				"url": {
+					"raw": "{{url}}/nmap/scan",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"nmap",
+						"scan"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Scan for open ports single",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "cada930d-926c-41ef-b29a-99eac8c0d4a6",
+						"exec": [
+							"postman.setEnvironmentVariable()"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"ipRange\": [\n\t\t\"localhost\"\n\t],\n\t\"command\": \"open_ports\",\n\t\"verbose\": 1,\n\t\"flags\": [],\n\t\"ports\": [\n\t\t\"1-100\"\n\t]\n}"
+				},
+				"url": {
+					"raw": "{{url}}/nmap/scan",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"nmap",
+						"scan"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Fast scan NOTYET",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"ipRange\": \"localhost\",\n\t\"flags\": [\n\t\t\"-T4\",\n\t\t\"-F\"\n\t],\n\t\"ports\": []\n}"
+				},
+				"url": {
+					"raw": "{{url}}/nmap/fast",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"nmap",
+						"fast"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Aggressively scan hosts NOTYET",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"ipRange\": \"192.168.0.0/24\",\n\t\"flags\": [\n\t\t\"-T4\",\n\t\t\"-A\"\n\t],\n\t\"ports\": []\n}"
+				},
+				"url": {
+					"raw": "{{url}}/nmap/aggro",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"nmap",
+						"aggro"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Identify hostnames NOTYET",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"ipRange\": \"192.168.0.0/24\",\n\t\"flags\": [\n\t\t\"-sL\"\n\t],\n\t\"ports\": []\n}"
+				},
+				"url": {
+					"raw": "{{url}}/nmap/hostnames",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"nmap",
+						"hostnames"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TCP Connect scan (NOTYET)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"ipRange\": \"192.168.0.164\",\n\t\"flags\": [\n\t\t\"-sT\"\n\t],\n\t\"ports\": []\n}"
+				},
+				"url": {
+					"raw": "{{url}}/nmap/tcpconnect",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"nmap",
+						"tcpconnect"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Identify OS of host (root)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"ipRange\": \"192.168.0.164\",\n\t\"flags\": [\n\t\t\"-O\"\n\t],\n\t\"ports\": []\n}"
+				},
+				"url": {
+					"raw": "{{url}}/nmap/os",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"nmap",
+						"os"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TCP Syn and UDP scan (root, port option) NOTYET",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"ipRange\": \"192.168.0.164\",\n\t\"flags\": [\n\t\t\"-sS\",\n\t\t\"-sU\",\n\t\t\"-PN\"\n\t],\n\t\"ports\": []\n}"
+				},
+				"url": {
+					"raw": "{{url}}/nmap/synudp",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"nmap",
+						"synudp"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
