@@ -8,35 +8,21 @@ use Doctrine\Common\Collections\Collection;
 use OpenApi\Annotations as OA;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\ServiceRepository")
+ * @MongoDB\Document
  */
 class Service
 {
     /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @MongoDB\Id
      */
     private $id;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
     private $name;
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
     private $product;
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
     private $version;
 
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Port", mappedBy="service")
-     */
     private $ports;
 
     public function __construct()

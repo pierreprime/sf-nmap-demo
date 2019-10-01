@@ -12,14 +12,12 @@ use OpenApi\Annotations as OA;
  *     description="Hostname description",
  *     title="Hostname"
  * )
- * @ORM\Entity(repositoryClass="App\Repository\HostnameRepository")
+ * @MongoDB\Document
  */
 class Hostname
 {
     /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @MongoDB\Id
      */
     private $id;
 
@@ -28,7 +26,6 @@ class Hostname
      *     description="Hostname value",
      *     title="Hostname"
      * )
-     * @ORM\Column(type="string", length=255)
      */
     private $name;
 
@@ -37,13 +34,9 @@ class Hostname
      *     description="Hostname type",
      *     title="Type"
      * )
-     * @ORM\Column(type="string", length=255)
      */
     private $type;
 
-    /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Host", mappedBy="hostnames")
-     */
     private $hosts;
 
     public function __construct()

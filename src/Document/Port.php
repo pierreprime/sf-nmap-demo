@@ -12,14 +12,12 @@ use OpenApi\Annotations as OA;
  *     description="Port description",
  *     title="Port"
  * )
- * @ORM\Entity(repositoryClass="App\Repository\PortRepository")
+ * @MongoDB\Document
  */
 class Port
 {
     /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @MongoDB\Id
      */
     private $id;
 
@@ -28,28 +26,15 @@ class Port
      *      description="Port number",
      *      title="
      * )
-     * @ORM\Column(type="integer")
      */
     private $number;
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
     private $protocol;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
     private $state;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Service", inversedBy="ports")
-     */
     private $service;
 
-    /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Host", mappedBy="ports")
-     */
     private $hosts;
 
     public function __construct()

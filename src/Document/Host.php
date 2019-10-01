@@ -12,14 +12,12 @@ use OpenApi\Annotations as OA;
  *     description="Host description, nmap report root",
  *     title="Host"
  * )
- * @ORM\Entity(repositoryClass="App\Repository\HostRepository")
+ * @MongoDB\Document
  */
 class Host
 {
     /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @MongoDB\Id
      */
     private $id;
 
@@ -28,23 +26,13 @@ class Host
      *     description="Host state, UP or DOWN enum",
      *     title="State"
      * )
-     * @ORM\Column(type="string", length=255)
      */
     private $state;
 
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Address", mappedBy="host")
-     */
     private $addresses;
 
-    /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Hostname", inversedBy="hosts")
-     */
     private $hostnames;
 
-    /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Port", inversedBy="hosts")
-     */
     private $ports;
 
     public function __construct()

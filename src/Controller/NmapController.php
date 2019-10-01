@@ -19,6 +19,9 @@ use Symfony\Component\HttpFoundation\Request;
 use OpenApi\Annotations as OA;
 use App\Document\User;
 use Doctrine\ODM\MongoDB\DocumentManager as DocumentManager;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\Serializer;
 
 /**
  * Class NmapController
@@ -64,6 +67,25 @@ class NmapController extends AbstractController
         $this->dm->flush();
 
         return new Response('Created address id '.$address->getId());
+    }
+
+    /**
+     * @Route("/mongo/get", methods={"GET"})
+     */
+    public function mongoGetTest(DocumentManager $dm, $id = '5d93d79544aa74379a62a123'){
+
+        // get $id query parameter
+        $address = $this->dm->getRepository(Address::class)->find($id);
+        if(!$address){
+            throw $this->createNotFoundException('No address found for id '.$id);
+        }
+        // JSON serialize address
+        $encoders = [new JsonEncoder()];
+        $normalizer = [new ObjectNormalizer()];
+        $serializer = new Serializer($normalizer, $encoders);
+
+        $json = $serializer->serialize($address, 'json');
+        return new Response($json);
     }
 
     // TEMP
