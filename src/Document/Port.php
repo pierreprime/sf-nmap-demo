@@ -12,7 +12,7 @@ use OpenApi\Annotations as OA;
  *     description="Port description",
  *     title="Port"
  * )
- * @MongoDB\Document
+ * @MongoDB\EmbeddedDocument
  */
 class Port
 {
@@ -24,22 +24,29 @@ class Port
     /**
      * @OA\Property(
      *      description="Port number",
-     *      title="
+     *      title=""
      * )
+     * @MongoDB\Field(type="integer")
      */
     private $number;
 
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $protocol;
 
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $state;
 
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $service;
-
-    private $hosts;
 
     public function __construct()
     {
-        $this->hosts = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -91,34 +98,6 @@ class Port
     public function setService(?Service $service): self
     {
         $this->service = $service;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection|Host[]
-     */
-    public function getHosts(): Collection
-    {
-        return $this->hosts;
-    }
-
-    public function addHost(Host $host): self
-    {
-        if (!$this->hosts->contains($host)) {
-            $this->hosts[] = $host;
-            $host->addPort($this);
-        }
-
-        return $this;
-    }
-
-    public function removeHost(Host $host): self
-    {
-        if ($this->hosts->contains($host)) {
-            $this->hosts->removeElement($host);
-            $host->removePort($this);
-        }
 
         return $this;
     }

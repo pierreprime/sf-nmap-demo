@@ -12,7 +12,7 @@ use OpenApi\Annotations as OA;
  *     description="Hostname description",
  *     title="Hostname"
  * )
- * @MongoDB\Document
+ * @MongoDB\EmbeddedDocument
  */
 class Hostname
 {
@@ -26,6 +26,7 @@ class Hostname
      *     description="Hostname value",
      *     title="Hostname"
      * )
+     * @MongoDB\Field(type="string")
      */
     private $name;
 
@@ -34,14 +35,12 @@ class Hostname
      *     description="Hostname type",
      *     title="Type"
      * )
+     * @MongoDB\Field(type="string")
      */
     private $type;
 
-    private $hosts;
-
     public function __construct()
     {
-        $this->hosts = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -69,34 +68,6 @@ class Hostname
     public function setType(string $type): self
     {
         $this->type = $type;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection|Host[]
-     */
-    public function getHosts(): Collection
-    {
-        return $this->hosts;
-    }
-
-    public function addHost(Host $host): self
-    {
-        if (!$this->hosts->contains($host)) {
-            $this->hosts[] = $host;
-            $host->addHostname($this);
-        }
-
-        return $this;
-    }
-
-    public function removeHost(Host $host): self
-    {
-        if ($this->hosts->contains($host)) {
-            $this->hosts->removeElement($host);
-            $host->removeHostname($this);
-        }
 
         return $this;
     }

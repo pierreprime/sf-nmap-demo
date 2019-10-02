@@ -3,23 +3,21 @@
 namespace App\Controller;
 
 use App\Document\Address;
+use App\Document\Scan;
 use App\Service\NmapService;
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Form\NmapRequest;
 use App\Form\NmapType;
 use App\Form\VanillaRequest;
 use App\Form\VanillaType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Request;
 use OpenApi\Annotations as OA;
-use App\Document\User;
 use Doctrine\ODM\MongoDB\DocumentManager as DocumentManager;
-use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Encoder\EncoderInterface;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 
@@ -54,6 +52,16 @@ class NmapController extends AbstractController
     private $nmapService;
 
     /**
+     * @var array
+     */
+    private $encoder;
+
+    /**
+     * @var array
+     */
+    private $normalizer;
+
+    /**
      * @Route("/mongo", methods={"GET"})
      */
     public function mongoTest(){
@@ -72,7 +80,7 @@ class NmapController extends AbstractController
     /**
      * @Route("/mongo/get", methods={"GET"})
      */
-    public function mongoGetTest(DocumentManager $dm, $id = '5d93d79544aa74379a62a123'){
+    public function mongoGetTest(DocumentManager $dm, $id = '5d94647ccb36f117de4ed6d3'){
 
         // get $id query parameter
         $address = $this->dm->getRepository(Address::class)->find($id);
@@ -80,21 +88,21 @@ class NmapController extends AbstractController
             throw $this->createNotFoundException('No address found for id '.$id);
         }
         // JSON serialize address
-        $encoders = [new JsonEncoder()];
-        $normalizer = [new ObjectNormalizer()];
-        $serializer = new Serializer($normalizer, $encoders);
+        $serializer = new Serializer($this->normalizer, $this->encoder);
 
         $json = $serializer->serialize($address, 'json');
         return new Response($json);
     }
 
     // TEMP
-    public function __construct(ObjectManager $om, RequestStack $requestStack, NmapService $nmapService, DocumentManager $dm)
+    public function __construct(ObjectManager $om, RequestStack $requestStack, NmapService $nmapService, DocumentManager $dm, EncoderInterface $encoder, ObjectNormalizer $normalizer)
     {
         $this->om = $om;
         $this->dm = $dm;
         $this->request = $requestStack->getCurrentRequest();
         $this->nmapService = $nmapService;
+        $this->encoder = [$encoder];
+        $this->normalizer = [$normalizer];
     }
 
     /**
@@ -120,28 +128,71 @@ class NmapController extends AbstractController
     {
         // determine ip range and ports list
         $data = json_decode($this->request->getContent(), true);
+        $serializer = new Serializer($this->normalizer, $this->encoder);
         $ipRange = $data['ipRange'];
         $command = $data['command'];
         $ports = $data['ports'];
 
-        // raw output
-        $hosts = [];
-        switch ($command){
-            case "discover_ips":
-                $hosts = $this->nmapService->discoverIpsSubnet($ipRange);
-                break;
-            case "open_ports":
-                $hosts = $this->nmapService->scanOpenPorts($ipRange, $ports);
-                break;
-            default:
-                $hosts = [
-                    'no hosts, invalid command'
-                ];
-                break;
+        if(!empty($data['id'])){
+            // get object of id $id in scan collection
+            $uuid = $data['id'];
+            $scan = $this->dm->getRepository(Scan::class)->find($uuid);
+            if(!$scan)
+                throw $this->createNotFoundException('No scan found for uuid '.$uuid);
+            // instance of serializer
+            $json = $serializer->serialize($scan, 'json');
+            $response = new Response($json);
         }
+        else {
+            // raw output
+            $hosts = [];
+            $saveFlag = (!isset($data['save']) || $data['save'] === true) ? true : false;
+            switch ($command) {
+                case "discover_ips":
+                    $hosts = $this->nmapService->discoverIpsSubnet($ipRange);
+                    break;
+                case "open_ports":
+                    $hosts = $this->nmapService->scanOpenPorts($ipRange, $ports);
+                    break;
+                default:
+                    $hosts = [
+                        'no hosts, invalid command'
+                    ];
+                    break;
+            }
+            // save to mongo
+            if($saveFlag){
+//                var_dump('save flag true');
+//                die();
+                $scan = new Scan();
+                // foreach host, add to hosts collection
+                $scan->setHosts($hosts);
+                $this->dm->persist($scan);
+                $this->dm->flush();
+                $message = 'Stored scan result';
 
-        return $this->json($hosts);
+//                var_dump(method_exists($scan, '__toString'));
+//                die();
+
+                $body = $serializer->serialize($scan, 'json');
+//                var_dump($body);
+//                die();
+
+                $response = new Response($body);
+                return $response;
+            }
+
+            $response = $this->json(array(
+//                'message' => empty($message) ? $message : null,
+                'hosts' => $hosts
+            ));
+        }
+        return $response;
     }
+
+    // make a scan GET route
+
+    // delete from here, put in in NmapService
 
     /**
      * @Route(
@@ -216,6 +267,8 @@ class NmapController extends AbstractController
 
     }
 
+    // KEEP
+
     /**
      * @Route(
      *     path="/nmap/report",
@@ -233,6 +286,8 @@ class NmapController extends AbstractController
             'hosts' => $hosts
         ]);
     }
+
+    // WEB INTERFACE DEMO
 
     /**
      * @Route(
@@ -292,6 +347,8 @@ class NmapController extends AbstractController
             'form' => $form->createView()
         ));
     }
+
+    // LEGACY VANILLA PART
 
     /**
      * @Route(

@@ -26,13 +26,23 @@ class Host
      *     description="Host state, UP or DOWN enum",
      *     title="State"
      * )
+     * @MongoDB\Field(type="string")
      */
     private $state;
 
+    /**
+     * @MongoDB\EmbedMany(targetDocument="Address")
+     */
     private $addresses;
 
+    /**
+     * @MongoDB\EmbedMany(targetDocument="Hostname")
+     */
     private $hostnames;
 
+    /**
+     * @MongoDB\EmbedMany(targetDocument="Port")
+     */
     private $ports;
 
     public function __construct()
@@ -140,5 +150,10 @@ class Host
         }
 
         return $this;
+    }
+
+    public function __toString()
+    {
+        return 'toto';
     }
 }

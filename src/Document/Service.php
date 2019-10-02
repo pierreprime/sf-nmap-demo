@@ -8,7 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use OpenApi\Annotations as OA;
 
 /**
- * @MongoDB\Document
+ * @MongoDB\EmbeddedDocument
  */
 class Service
 {
@@ -17,17 +17,23 @@ class Service
      */
     private $id;
 
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $name;
 
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $product;
 
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $version;
-
-    private $ports;
 
     public function __construct()
     {
-        $this->ports = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -67,37 +73,6 @@ class Service
     public function setVersion(?string $version): self
     {
         $this->version = $version;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection|Port[]
-     */
-    public function getPorts(): Collection
-    {
-        return $this->ports;
-    }
-
-    public function addPort(Port $port): self
-    {
-        if (!$this->ports->contains($port)) {
-            $this->ports[] = $port;
-            $port->setService($this);
-        }
-
-        return $this;
-    }
-
-    public function removePort(Port $port): self
-    {
-        if ($this->ports->contains($port)) {
-            $this->ports->removeElement($port);
-            // set the owning side to null (unless already changed)
-            if ($port->getService() === $this) {
-                $port->setService(null);
-            }
-        }
 
         return $this;
     }

@@ -10,7 +10,7 @@ use OpenApi\Annotations as OA;
  *     description="Generic address description",
  *     title="Address"
  * )
- * @MongoDB\Document
+ * @MongoDB\EmbeddedDocument
  */
 class Address
 {
@@ -45,11 +45,6 @@ class Address
      * @MongoDB\Field(type="string")
      */
     private $vendor;
-
-    /**
-     * @MongoDB\Field(type="integer")
-     */
-    private $host;
 
     public function getId(): ?string
     {
@@ -88,18 +83,6 @@ class Address
     public function setVendor(?string $vendor): self
     {
         $this->vendor = $vendor;
-
-        return $this;
-    }
-
-    public function getHost(): ?Host
-    {
-        return $this->host;
-    }
-
-    public function setHost(?Host $host): self
-    {
-        $this->host = $host;
 
         return $this;
     }
