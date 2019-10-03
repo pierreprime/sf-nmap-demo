@@ -10,7 +10,9 @@ use App\Document\Scan;
 use App\Document\Service;
 use App\Service\NmapService;
 use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ODM\MongoDB\Repository\DocumentRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Form\NmapRequest;
@@ -66,6 +68,11 @@ class NmapController extends AbstractController
     private $normalizer;
 
     /**
+     * @var DocumentRepository
+     */
+    private $scanRepository;
+
+    /**
      * @Route("/mongo", methods={"GET"})
      */
     public function mongoTest(){
@@ -99,7 +106,7 @@ class NmapController extends AbstractController
     }
 
     // TEMP
-    public function __construct(ObjectManager $om, RequestStack $requestStack, NmapService $nmapService, DocumentManager $dm, EncoderInterface $encoder, ObjectNormalizer $normalizer)
+    public function __construct(ObjectManager $om, RequestStack $requestStack, NmapService $nmapService, DocumentManager $dm, EncoderInterface $encoder, ObjectNormalizer $normalizer, DocumentRepository $scanRepository)
     {
         $this->om = $om;
         $this->dm = $dm;
@@ -107,6 +114,7 @@ class NmapController extends AbstractController
         $this->nmapService = $nmapService;
         $this->encoder = [$encoder];
         $this->normalizer = [$normalizer];
+        $this->scanRepository = $scanRepository;
     }
 
     /**
@@ -128,7 +136,7 @@ class NmapController extends AbstractController
      *     methods={"POST"}
      * )
      */
-    public function nmapScanValid()
+    public function nmapScan()
     {
         // determine ip range and ports list
         $data = json_decode($this->request->getContent(), true);
@@ -167,28 +175,50 @@ class NmapController extends AbstractController
             }
             // save to mongo
             if($saveFlag){
-
-//                var_dump($scanDocument);
-//                die();
-
                 $this->dm->persist($scanDocument);
                 $this->dm->flush();
                 $message = 'Stored scan result';
                 $body = $serializer->serialize($scanDocument, 'json');
-
                 $response = new Response($body);
                 return $response;
             }
 
             $response = $this->json(array(
-//                'message' => empty($message) ? $message : null,
+                'message' => empty($message) ? $message : null,
                 'hosts' => $hosts
             ));
         }
         return $response;
     }
 
-    // make a scan GET route
+    /**
+     * @OA\Get(
+     *     path="/nmap/scan",
+     *     description="Get nmap scan by UUID",
+     *     @OA\Response(
+     *          response=200,
+     *          description="Multiple hosts report",
+     *          @OA\JsonContent(
+     *              type="array",
+     *              @OA\Items(ref="#/components/schema/Host")
+     *          )
+     *     )
+     * )
+     * @Route(
+     *     path="/nmap/scan/{uuid}",
+     *     name="nmap_scan_get",
+     *     methods={"GET"}
+     * )
+     */
+    public function nmapGet($uuid){
+        $scan = $this->scanRepository->find($uuid);
+
+        if(!$scan){
+            throw $this->createNotFoundException('Scan of uuid '.$uuid.' was not found.');
+        }
+
+        return new JsonResponse($scan);
+    }
 
     // delete from here, put in in NmapService
 
