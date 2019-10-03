@@ -14,7 +14,7 @@ use OpenApi\Annotations as OA;
  * )
  * @MongoDB\EmbeddedDocument
  */
-class Hostname
+class Hostname implements \JsonSerializable
 {
     /**
      * @MongoDB\Id
@@ -39,11 +39,19 @@ class Hostname
      */
     private $type;
 
-    public function __construct()
+    public function __construct($name, $type)
     {
+        $this->name = $name;
+        $this->type = $type;
     }
 
-    public function getId(): ?int
+    public function jsonSerialize()
+    {
+        $vars = get_object_vars($this);
+        return $vars;
+    }
+
+    public function getId(): ?string
     {
         return $this->id;
     }

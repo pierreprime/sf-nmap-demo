@@ -14,7 +14,7 @@ use OpenApi\Annotations as OA;
  * )
  * @MongoDB\Document
  */
-class Host
+class Host implements \JsonSerializable
 {
     /**
      * @MongoDB\Id
@@ -45,14 +45,22 @@ class Host
      */
     private $ports;
 
-    public function __construct()
+    public function __construct($state, $addresses, $hostnames, $ports)
     {
-        $this->addresses = new ArrayCollection();
-        $this->hostnames = new ArrayCollection();
-        $this->ports = new ArrayCollection();
+        unset($this->addresses);
+        $this->state = $state;
+        $this->addresses = $addresses;
+        $this->hostnames = $hostnames;
+        $this->ports = $ports;
     }
 
-    public function getId(): ?int
+    public function jsonSerialize()
+    {
+        $vars = get_object_vars($this);
+        return $vars;
+    }
+
+    public function getId(): ?string
     {
         return $this->id;
     }
@@ -70,9 +78,9 @@ class Host
     }
 
     /**
-     * @return Collection|Address[]
+     * @return Address[]
      */
-    public function getAddresses(): Collection
+    public function getAddresses()
     {
         return $this->addresses;
     }

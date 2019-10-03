@@ -12,7 +12,7 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
  * )
  * @MongoDB\Document
  */
-class Scan
+class Scan implements \JsonSerializable
 {
     /**
      * @MongoDB\Id
@@ -23,6 +23,16 @@ class Scan
      * @MongoDB\EmbedMany(targetDocument="Host")
      */
     private $hosts;
+
+    public function __construct()
+    {
+    }
+
+    public function jsonSerialize()
+    {
+        $vars = get_object_vars($this);
+        return $vars;
+    }
 
     /**
      * @return mixed

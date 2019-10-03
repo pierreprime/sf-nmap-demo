@@ -12,7 +12,7 @@ use OpenApi\Annotations as OA;
  * )
  * @MongoDB\EmbeddedDocument
  */
-class Address
+class Address implements \JsonSerializable
 {
     /**
      * @MongoDB\Id
@@ -45,6 +45,19 @@ class Address
      * @MongoDB\Field(type="string")
      */
     private $vendor;
+
+    public function __construct($address, $type, $vendor)
+    {
+        $this->address = $address;
+        $this->type = $type;
+        $this->vendor = $vendor;
+    }
+
+    public function jsonSerialize()
+    {
+        $vars = get_object_vars($this);
+        return $vars;
+    }
 
     public function getId(): ?string
     {

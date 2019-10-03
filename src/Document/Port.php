@@ -14,7 +14,7 @@ use OpenApi\Annotations as OA;
  * )
  * @MongoDB\EmbeddedDocument
  */
-class Port
+class Port implements \JsonSerializable
 {
     /**
      * @MongoDB\Id
@@ -41,15 +41,25 @@ class Port
     private $state;
 
     /**
-     * @MongoDB\Field(type="string")
+     * @MongoDB\EmbedOne(targetDocument="Service")
      */
     private $service;
 
-    public function __construct()
+    public function __construct($number, $protocol, $state, $service = [])
     {
+        $this->number = $number;
+        $this->protocol = $protocol;
+        $this->state = $state;
+        $this->service = $service;
     }
 
-    public function getId(): ?int
+    public function jsonSerialize()
+    {
+        $vars = get_object_vars($this);
+        return $vars;
+    }
+
+    public function getId(): ?string
     {
         return $this->id;
     }

@@ -3,7 +3,11 @@
 namespace App\Controller;
 
 use App\Document\Address;
+use App\Document\Host;
+use App\Document\Hostname;
+use App\Document\Port;
 use App\Document\Scan;
+use App\Document\Service;
 use App\Service\NmapService;
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -150,9 +154,10 @@ class NmapController extends AbstractController
             switch ($command) {
                 case "discover_ips":
                     $hosts = $this->nmapService->discoverIpsSubnet($ipRange);
+                    var_dump($hosts);
                     break;
                 case "open_ports":
-                    $hosts = $this->nmapService->scanOpenPorts($ipRange, $ports);
+                    $scanDocument = $this->nmapService->scanOpenPorts($ipRange, $ports);
                     break;
                 default:
                     $hosts = [
@@ -162,21 +167,14 @@ class NmapController extends AbstractController
             }
             // save to mongo
             if($saveFlag){
-//                var_dump('save flag true');
+
+//                var_dump($scanDocument);
 //                die();
-                $scan = new Scan();
-                // foreach host, add to hosts collection
-                $scan->setHosts($hosts);
-                $this->dm->persist($scan);
+
+                $this->dm->persist($scanDocument);
                 $this->dm->flush();
                 $message = 'Stored scan result';
-
-//                var_dump(method_exists($scan, '__toString'));
-//                die();
-
-                $body = $serializer->serialize($scan, 'json');
-//                var_dump($body);
-//                die();
+                $body = $serializer->serialize($scanDocument, 'json');
 
                 $response = new Response($body);
                 return $response;

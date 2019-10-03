@@ -10,7 +10,7 @@ use OpenApi\Annotations as OA;
 /**
  * @MongoDB\EmbeddedDocument
  */
-class Service
+class Service implements \JsonSerializable
 {
     /**
      * @MongoDB\Id
@@ -32,11 +32,20 @@ class Service
      */
     private $version;
 
-    public function __construct()
+    public function __construct($name, $product, $version)
     {
+        $this->name = $name;
+        $this->product = $product;
+        $this->version = $version;
     }
 
-    public function getId(): ?int
+    public function jsonSerialize()
+    {
+        $vars = get_object_vars($this);
+        return $vars;
+    }
+
+    public function getId(): ?string
     {
         return $this->id;
     }
