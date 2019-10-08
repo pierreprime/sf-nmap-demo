@@ -3,11 +3,7 @@
 namespace App\Controller;
 
 use App\Document\Address;
-use App\Document\Host;
-use App\Document\Hostname;
-use App\Document\Port;
 use App\Document\Scan;
-use App\Document\Service;
 use App\Service\NmapService;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ODM\MongoDB\Repository\DocumentRepository;
@@ -106,7 +102,7 @@ class NmapController extends AbstractController
     }
 
     // TEMP
-    public function __construct(ObjectManager $om, RequestStack $requestStack, NmapService $nmapService, DocumentManager $dm, EncoderInterface $encoder, ObjectNormalizer $normalizer, DocumentRepository $scanRepository)
+    public function __construct(ObjectManager $om, RequestStack $requestStack, NmapService $nmapService, DocumentManager $dm, EncoderInterface $encoder, ObjectNormalizer $normalizer)
     {
         $this->om = $om;
         $this->dm = $dm;
@@ -114,7 +110,7 @@ class NmapController extends AbstractController
         $this->nmapService = $nmapService;
         $this->encoder = [$encoder];
         $this->normalizer = [$normalizer];
-        $this->scanRepository = $scanRepository;
+        $this->scanRepository = $this->dm->getRepository(Scan::class);
     }
 
     /**
@@ -161,8 +157,7 @@ class NmapController extends AbstractController
             $saveFlag = (!isset($data['save']) || $data['save'] === true) ? true : false;
             switch ($command) {
                 case "discover_ips":
-                    $hosts = $this->nmapService->discoverIpsSubnet($ipRange);
-                    var_dump($hosts);
+                    $scanDocument = $this->nmapService->discoverIpsSubnet($ipRange);
                     break;
                 case "open_ports":
                     $scanDocument = $this->nmapService->scanOpenPorts($ipRange, $ports);
@@ -180,6 +175,7 @@ class NmapController extends AbstractController
                 $message = 'Stored scan result';
                 $body = $serializer->serialize($scanDocument, 'json');
                 $response = new Response($body);
+                $response->headers->set('Content-Type', 'application/json');
                 return $response;
             }
 
@@ -211,13 +207,20 @@ class NmapController extends AbstractController
      * )
      */
     public function nmapGet($uuid){
-        $scan = $this->scanRepository->find($uuid);
+        // Scan Document instance
+        $scanDocument = $this->scanRepository->find($uuid);
+        $serializer = new Serializer($this->normalizer, $this->encoder);
 
-        if(!$scan){
+        if(!$scanDocument){
             throw $this->createNotFoundException('Scan of uuid '.$uuid.' was not found.');
         }
 
-        return new JsonResponse($scan);
+//        var_dump($scanDocument);
+
+        $body = $serializer->serialize($scanDocument, 'json');
+        $response = new Response($body);
+        $response->headers->set('Content-Type', 'application/json');
+        return $response;
     }
 
     // delete from here, put in in NmapService

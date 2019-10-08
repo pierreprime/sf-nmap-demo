@@ -60,7 +60,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"ipRange\": [\n\t\t\"{{network_v4}}\"\n\t],\n\t\"command\": \"open_ports\",\n\t\"verbose\": 1,\n\t\"flags\": [],\n\t\"ports\": [\n\t\t\"1-100\"\n\t]\n}"
+					"raw": "{\n\t\"ipRange\": [\n\t\t\"{{network_v4}}\"\n\t],\n\t\"command\": \"open_ports\",\n\t\"verbose\": 1,\n\t\"flags\": [],\n\t\"ports\": [\n\t\t\"1-81\"\n\t]\n}"
 				},
 				"url": {
 					"raw": "{{url}}/nmap/scan",
@@ -101,7 +101,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"ipRange\": [\n\t\t\"localhost\"\n\t],\n\t\"command\": \"open_ports\",\n\t\"verbose\": 1,\n\t\"flags\": [],\n\t\"ports\": [\n\t\t\"1-100\"\n\t]\n}"
+					"raw": "{\n\t\"ipRange\": [\n\t\t\"localhost\"\n\t],\n\t\"command\": \"open_ports\",\n\t\"verbose\": 1,\n\t\"flags\": [],\n\t\"ports\": [\n\t\t\"1-100\"\n\t],\n\t\"save\": true\n}"
 				},
 				"url": {
 					"raw": "{{url}}/nmap/scan",
@@ -111,6 +111,141 @@
 					"path": [
 						"nmap",
 						"scan"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Retrieve scan by UUID",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "cada930d-926c-41ef-b29a-99eac8c0d4a6",
+						"exec": [
+							"postman.setEnvironmentVariable()"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"id\": \"{{scan_uuid}}\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/nmap/scan/{{scan_uuid}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"nmap",
+						"scan",
+						"{{scan_uuid}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Retrieve massive scan by UUID",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "cada930d-926c-41ef-b29a-99eac8c0d4a6",
+						"exec": [
+							"postman.setEnvironmentVariable()"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"id\": \"{{scan_uuid}}\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/nmap/scan/{{massive_uuid}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"nmap",
+						"scan",
+						"{{massive_uuid}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Retrieve host discovery by UUID",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "cada930d-926c-41ef-b29a-99eac8c0d4a6",
+						"exec": [
+							"postman.setEnvironmentVariable()"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"id\": \"{{scan_uuid}}\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/nmap/scan/{{discover_uuid}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"nmap",
+						"scan",
+						"{{discover_uuid}}"
 					]
 				}
 			},
@@ -285,6 +420,69 @@
 					"path": [
 						"nmap",
 						"synudp"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Mongo create",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"ipRange\": \"192.168.0.164\",\n\t\"flags\": [\n\t\t\"-sS\",\n\t\t\"-sU\",\n\t\t\"-PN\"\n\t],\n\t\"ports\": []\n}"
+				},
+				"url": {
+					"raw": "{{url}}/mongo",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"mongo"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Mongo get",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"ipRange\": \"192.168.0.164\",\n\t\"flags\": [\n\t\t\"-sS\",\n\t\t\"-sU\",\n\t\t\"-PN\"\n\t],\n\t\"ports\": []\n}"
+				},
+				"url": {
+					"raw": "{{url}}/mongo/get",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"mongo",
+						"get"
 					]
 				}
 			},

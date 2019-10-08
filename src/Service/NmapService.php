@@ -39,7 +39,7 @@ class NmapService
     /**
      * @param $ipRange
      * @param array $portsList
-     * @return array
+     * @return Scan
      */
     public function discoverIpsSubnet($ipRange, $portsList = [])
     {
@@ -51,7 +51,12 @@ class NmapService
             ->disablePortScan()
             ->scan($ipRange);
         // copyScanContent
-        return json_decode(json_encode($hostArray), true);
+//        return json_decode(json_encode($hostArray), true);
+        $purgedScanArray = $this->copyToChildScanClasses($hostArray);
+
+        $scanDocument = $this->buildScanDocument($purgedScanArray);
+        // replace this with JsonSerialize strategy from Scan or Host
+        return $scanDocument;
     }
 
     /**

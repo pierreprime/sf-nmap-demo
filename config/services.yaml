@@ -30,7 +30,12 @@ services:
         class: Nmap\Nmap
         autowire: true
 
+    document_repository_wiring:
+        class: Doctrine\ODM\MongoDB
+        autowire: true
+
     Nmap\Nmap: '@willdurand_nmap_service'
+    Doctrine\ODM\MongoDB: '@document_repository_wiring'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
