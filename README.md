@@ -21,7 +21,12 @@ Adapt willdurand nmap examples in symfony
 * Check if socket config is ok
 * Fix nmap scan for ip range
 
-## Mongo admin
+## Launch project
+
+```
+php bin/console server:run
+yarn encore dev --watch
+```
 
 Mongo express installed with node locally. To launch it run :
 ```

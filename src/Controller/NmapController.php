@@ -379,118 +379,17 @@ class NmapController extends AbstractController
         ));
     }
 
-    // LEGACY VANILLA PART
-
     /**
      * @Route(
-     *     path="/vanilla",
-     *     name="vanilla"
+     *     path="/admin",
+     *     name="admin"
      * )
+     * PHPMoAdmin route, not working, remove later if no clue, use MongoExpress instead
      */
-    public function vanillaIndex()
+    public function mongoAdmin()
     {
-        // form with redirect to route report
-        //$nmapRequest = new NmapRequest();
-        //$form = $this->createForm(NmapType::class, $nmapRequest);
-
-        $vanillaRequest = new VanillaRequest();
-        $form = $this->createForm(VanillaType::class, $vanillaRequest);
-        $form->handleRequest($this->request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $data = $form->getData();
-            // launch nmap scan
-            return $this->redirectToRoute('vanilla_report', array(
-                'ip' => $data->getFromIp(),
-                'from' => $data->getFromPort(),
-                'to' => $data->getToPort()
-            ));
-        }
-
-        return $this->render('vanilla/index.html.twig', array(
-            'form' => $form->createView()
-        ));
-    }
-
-    /**
-     * @Route(
-     *     path="/vanilla/report",
-     *     name="vanilla_report"
-     * )
-     */
-    public function vanillaScan()
-    {
-        // script
-        error_reporting(-E_ALL);
-        // ip port range and ip
-        $host = $this->request->get('ip');
-        // nb of connection varies following default_socket_timeout
-        $from = $this->request->get('from');
-        $to = $this->request->get('to');
-
-        $openPorts = array();
-
-        // validation
-        if (empty($host) || empty($from) || empty($to)) {
-            echo "<b>Incomplete data, go back choose IP address and port range</b>";
-        } else if (!(filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4))) {
-            echo "<b>This IP address is not valid !</b>";
-        } else if (!(is_numeric($from)) || !(is_numeric($to))) {
-            echo "<b>Entered data is not port number</b>";
-        } else if ($from > $to || $from == $to) {
-            echo "<b>Please enter lower value in the FROM field</b>";
-        } else // everything OK
-        {
-            echo "<br>
-            <b>
-                <u>Scanned IP/Host : $host</u>
-                <br>
-                <u>
-                    <i>List of open ports</i>
-                </u>
-            </b>
-        <br>";
-            // create socket
-            $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-
-            for ($port = $from; $port <= $to; $port++) {
-                // connect to host and port
-                $connection = socket_connect($socket, $host, $port);
-
-                // make list of open ports in the loop
-
-                if ($connection) {
-                    // add to open ports
-                    array_push($openPorts, $port);
-
-                    // port open warning on connect
-                    echo "port $port Open (Warning !) <img src='warning.png' height=30px width=30px alt='open port warning'><br>";
-                    // close socket connection
-                    socket_close($socket);
-                    // create new when earlier socket was closed, recreate when connection made
-                    // otherwise same socket used
-                    $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-                }
-            }
-        }
-
-        return $this->render('vanilla/report.html.twig', array(
-            'host' => $host,
-            'from' => $from,
-            'to' => $to,
-            'openPorts' => $openPorts
-        ));
-    }
-
-    /**
-     * @Route(
-     *     path="/",
-     *     name="report"
-     * )
-     */
-    public function report()
-    {
-        return $this->render('nmap/report.html.twig');
+//        return $this->render('admin/moadmin.php');
+        require_once(__DIR__.'/../../templates/admin/moadmin.php');
     }
 }
 

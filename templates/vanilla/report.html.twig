@@ -1,11 +1,75 @@
-{#
 {% extends 'base.html.twig' %}
 
 {% block title %}Port scanner report{% endblock %}
 
 {% block body %}
-    {% if host is empty || from is empty || to is empty %}
-        <b>Incomplete data, go back choose IP address and port range</b>
-        {% else if  %}
-    {% endif %}
-{% endblock %}#}
+
+    {# data attributes to pass variables to JavaScript, with data-* prefix to make data readable #}
+{#    <div#}
+{#            class="js-data"#}
+{#            data-host="{{ host ? host : null }}"#}
+{#            data-from="{{ from ? from : null }}"#}
+{#            data-to="{{ to ? to : null }}"#}
+{#    ></div>#}
+    <div id="error-box">{{ error }}</div>
+    <div id="scan-title">Scan result for host {{ host }}</div>
+
+{#    {% if host is empty || from is empty || to is empty %}#}
+{#        <b>Incomplete data, go back choose IP address and port range</b>#}
+{#        {% else if  %}#}
+{#    {% endif %}#}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        // document.addEventListener('DOMContentLoaded', function () {
+        //     // initialize open ports array
+        //     var openPorts = [];
+        //     var jsData = document.querySelector('.js-data');
+        //     var host = jsData.dataset.host;
+        //     var from = jsData.dataset.from;
+        //     var to = jsData.dataset.to;
+        //
+        //     console.log(host, from, to);
+        //
+        //     //     validation of host, from and to
+        //     if(host === null || from === null || to === null){
+        //         document.getElementById('error-box').innerHTML = '<b>Incomplete data, go back choose IP address and port range</b>';
+        //     }
+        //     else if(!validateIPaddress(host)){
+        //         document.getElementById('error-box').innerHTML = '<b>This IP address is not valid !</b>';
+        //     }
+        //     else if(!(typeof from === 'number') || !(typeof to === 'number')){
+        //         document.getElementById('error-box').innerHTML = '<b>Entered data is not port number</b>';
+        //     }
+        //     else if(from >= to){
+        //         document.getElementById('error-box').innerHTML = '<b>Please enter lower value in the FROM field</b>';
+        //     }
+        //     else{
+        //         document.getElementById('scan-title').innerHTML = '<br><b><u>Scanned IP/Host : ' + host + '</u><br><u><i>List of open ports</i></u></b><br>';
+        //
+        //         // create raw TCP socket
+        //         var socket = navigator.mozTCPSocket.open(host, 80);
+        //
+        //         for(var port=from; port<=to; port++){
+        //
+        //         }
+        //     }
+        //     //
+        //     // LOOP : FROM TO
+        //     // else if everything ok : display scanned ip / host and open ports
+        //     // extract socket connection, add open ports to array
+        //     // recreate connection at end of the loop
+        // });
+        //
+        // function validateIPaddress(ip)
+        // {
+        //     if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ip))
+        //     {
+        //         return true;
+        //     }
+        //     return false;
+        // }
+    </script>
+{% endblock %}
