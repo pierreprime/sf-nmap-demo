@@ -20,3 +20,11 @@ https://rollbar.com/guides/where-are-php-errors-logged/
 Adapt willdurand nmap examples in symfony
 * Check if socket config is ok
 * Fix nmap scan for ip range
+
+## Mongo admin
+
+Mongo express installed with node locally. To launch it run :
+```
+cd node_modules/mongo-express/ && node app.js -u symfony -p symfony -d symfony
+```
+Adapt to used credentials.
