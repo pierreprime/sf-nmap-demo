@@ -30,6 +30,7 @@ yarn encore dev --watch
 
 Mongo express installed with node locally. To launch it run :
 ```
+sudo service mongodb start
 cd node_modules/mongo-express/ && node app.js -u symfony -p symfony -d symfony
 ```
 Adapt to used credentials.
