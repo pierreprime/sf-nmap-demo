@@ -68,39 +68,6 @@ class NmapController extends AbstractController
      */
     private $scanRepository;
 
-    /**
-     * @Route("/mongo", methods={"GET"})
-     */
-    public function mongoTest(){
-
-        $address = new Address();
-        $address->setAddress('localhost');
-        $address->setType('type1');
-        $address->setVendor('tigers');
-        // make host nullable
-        $this->dm->persist($address);
-        $this->dm->flush();
-
-        return new Response('Created address id '.$address->getId());
-    }
-
-    /**
-     * @Route("/mongo/get", methods={"GET"})
-     */
-    public function mongoGetTest(DocumentManager $dm, $id = '5d94647ccb36f117de4ed6d3'){
-
-        // get $id query parameter
-        $address = $this->dm->getRepository(Address::class)->find($id);
-        if(!$address){
-            throw $this->createNotFoundException('No address found for id '.$id);
-        }
-        // JSON serialize address
-        $serializer = new Serializer($this->normalizer, $this->encoder);
-
-        $json = $serializer->serialize($address, 'json');
-        return new Response($json);
-    }
-
     // TEMP
     public function __construct(ObjectManager $om, RequestStack $requestStack, NmapService $nmapService, DocumentManager $dm, EncoderInterface $encoder, ObjectNormalizer $normalizer)
     {
@@ -377,6 +344,17 @@ class NmapController extends AbstractController
         return $this->render('nmap/index.html.twig', array(
             'form' => $form->createView()
         ));
+    }
+
+    /**
+     * @Route(
+     *     path="/shooter",
+     *     name="shooter"
+     * )
+     */
+    public function shooter()
+    {
+        return $this->render('shooter/shooter.html.twig');
     }
 
     /**
